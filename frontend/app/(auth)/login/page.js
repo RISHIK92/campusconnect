@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import { api } from "../../lib/api";
-import { useAuth } from "../../contexts/AuthContext";
+import { api } from "../../../lib/api";
+import { useAuth } from "../../../contexts/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [loginType, setLoginType] = useState("user"); // 'user' or 'admin'
+  const [loginType, setLoginType] = useState("user");
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -75,7 +77,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-2xl">
-        {/* Header */}
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Sign In
@@ -85,7 +86,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Type Toggle */}
         <div className="flex rounded-lg overflow-hidden border border-gray-300">
           <button
             type="button"
@@ -111,7 +111,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Admin Notice */}
         {loginType === "admin" && (
           <div className="rounded-md bg-yellow-50 p-4 border border-yellow-200">
             <div className="flex">
@@ -140,7 +139,6 @@ export default function LoginPage() {
         {/* Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -156,12 +154,11 @@ export default function LoginPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="you@example.com"
               />
             </div>
 
-            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -172,18 +169,17 @@ export default function LoginPage() {
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={open ? "text" : "password"}
                 autoComplete="current-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter your password"
               />
             </div>
           </div>
 
-          {/* Testing Quick Fill (Remove in production) */}
           <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
             <p className="text-xs text-gray-600 mb-2">
               Quick fill for testing:
@@ -244,7 +240,6 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Footer Links */}
         <div className="text-center space-y-2">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
