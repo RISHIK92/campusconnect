@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin user
   const hashedPassword = await bcrypt.hash("admin123", 10);
 
   const admin = await prisma.user.upsert({
@@ -23,7 +22,6 @@ async function main() {
 
   console.log("✅ Created admin user:", admin.email);
 
-  // Create sample users
   const user1Password = await bcrypt.hash("user123", 10);
 
   const user1 = await prisma.user.upsert({
@@ -50,7 +48,6 @@ async function main() {
 
   console.log("✅ Created sample users");
 
-  // Create sample events
   const events = [
     {
       title: "Tech Fest 2025",

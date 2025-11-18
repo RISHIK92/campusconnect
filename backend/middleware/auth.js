@@ -3,7 +3,6 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-// Verify JWT token
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];

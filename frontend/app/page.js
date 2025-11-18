@@ -42,7 +42,6 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32">
         <div className="max-w-4xl">
           <div className="inline-block px-4 py-1 border border-gray-300 text-xs font-medium text-gray-900 tracking-wide uppercase mb-8">
