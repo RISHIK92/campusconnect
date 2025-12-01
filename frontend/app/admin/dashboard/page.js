@@ -320,68 +320,71 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {events.map((event) => (
-                  <tr key={event.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          {event.imageUrl ? (
-                            <img
-                              className="h-10 w-10 rounded object-cover"
-                              src={event.imageUrl}
-                              alt=""
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
-                              <Calendar className="h-5 w-5 text-gray-500" />
+                {Array.isArray(events) &&
+                  events.map((event) => (
+                    <tr key={event.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0">
+                            {event.imageUrl ? (
+                              <img
+                                className="h-10 w-10 rounded object-cover"
+                                src={event.imageUrl}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
+                                <Calendar className="h-5 w-5 text-gray-500" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {event.title}
                             </div>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {event.title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {event.category}
+                            <div className="text-sm text-gray-500">
+                              {event.category}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(event.date).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">{event.time}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {event.venue}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {event._count?.registrations || 0} / {event.capacity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => openModal(event)}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleViewRegistrations(event)}
-                        className="text-green-600 hover:text-green-900 mr-4"
-                        title="View Registrations"
-                      >
-                        <Users className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(event.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(event.date).toLocaleDateString()}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {event.time}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {event.venue}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {event._count?.registrations || 0} / {event.capacity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => openModal(event)}
+                          className="text-blue-600 hover:text-blue-900 mr-4"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleViewRegistrations(event)}
+                          className="text-green-600 hover:text-green-900 mr-4"
+                          title="View Registrations"
+                        >
+                          <Users className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(event.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
