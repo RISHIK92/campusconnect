@@ -15,7 +15,7 @@ import {
   X,
   Check,
 } from "lucide-react";
-import toast from "react-toastify";
+import { toast } from "react-toastify";
 
 export default function AdminDashboard() {
   const { token, user, isAuthenticated, isAdmin } = useAuth();
