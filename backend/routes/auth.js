@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validate } = require("../middleware/validate");
 const { signupSchema, loginSchema } = require("../utils/validation");
-const { prisma } = require("../config/db.js");
+const prisma = require("../config/db.js");
 
 const router = express.Router();
 

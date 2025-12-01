@@ -1,6 +1,6 @@
 const express = require("express");
 const { authenticateToken, isAdmin } = require("../middleware/auth");
-const { prisma } = require("../config/db.js");
+const prisma = require("../config/db.js");
 
 const router = express.Router();
 

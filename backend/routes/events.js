@@ -3,7 +3,7 @@ const QRCode = require("qrcode");
 const { authenticateToken, isAdmin } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { createEventSchema, updateEventSchema } = require("../utils/validation");
-const { prisma } = require("../config/db.js");
+const prisma = require("../config/db.js");
 
 const router = express.Router();
 
