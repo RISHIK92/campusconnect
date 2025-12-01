@@ -27,17 +27,51 @@ export default function HomePage() {
               </span>
             </div>
 
-            {isAuthenticated && (
-              <button
-                onClick={logout}
-                className="flex items-center space-x-2 px-5 py-2 border border-gray-300 hover:border-black transition-colors duration-200"
-              >
-                <span className="text-sm font-medium text-gray-900">
-                  Logout
-                </span>
-                <LogOut className="w-4 h-4 text-gray-900" />
-              </button>
-            )}
+            <div className="flex items-center space-x-6">
+              {isAuthenticated && (
+                <>
+                  <Link
+                    href="/events"
+                    className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                  >
+                    Events
+                  </Link>
+                  {!isAdmin() && (
+                    <Link
+                      href="/registrations"
+                      className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                    >
+                      My Registrations
+                    </Link>
+                  )}
+                  {isAdmin() && (
+                    <>
+                      <Link
+                        href="/admin/dashboard"
+                        className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/verify"
+                        className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                      >
+                        Verify
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    onClick={logout}
+                    className="flex items-center space-x-2 px-5 py-2 border border-gray-300 hover:border-black transition-colors duration-200"
+                  >
+                    <span className="text-sm font-medium text-gray-900">
+                      Logout
+                    </span>
+                    <LogOut className="w-4 h-4 text-gray-900" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
