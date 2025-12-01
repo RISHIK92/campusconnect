@@ -1,31 +1,42 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
+const QRCode = require("qrcode");
 const { authenticateToken, isAdmin } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { createEventSchema, updateEventSchema } = require("../utils/validation");
+const { prisma } = require("../config/db.js");
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-// GET /api/events - Get all events
 router.get("/", authenticateToken, async (req, res) => {
   try {
-    const { category, upcoming } = req.query;
+    const { page = 1, limit = 10, search, filter } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
 
     const where = {};
 
-    if (category) {
-      where.category = category;
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { venue: { contains: search, mode: "insensitive" } },
+      ];
     }
 
-    if (upcoming === "true") {
-      where.date = {
-        gte: new Date(),
-      };
+    const now = new Date();
+    if (filter === "upcoming") {
+      where.date = { gte: now };
+    } else if (filter === "past") {
+      where.date = { lt: now };
     }
+
+    const totalEvents = await prisma.event.count({ where });
+    const totalPages = Math.ceil(totalEvents / take);
 
     const events = await prisma.event.findMany({
       where,
+      skip,
+      take,
       include: {
         _count: {
           select: { registrations: true },
@@ -56,14 +67,21 @@ router.get("/", authenticateToken, async (req, res) => {
       })
     );
 
-    res.json(eventsWithStatus);
+    res.json({
+      events: eventsWithStatus,
+      metadata: {
+        totalEvents,
+        totalPages,
+        currentPage: parseInt(page),
+        limit: take,
+      },
+    });
   } catch (error) {
     console.error("Get events error:", error);
     res.status(500).json({ error: "Failed to fetch events" });
   }
 });
 
-// GET /api/events/:id - Get single event
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -102,7 +120,117 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/events - Create new event (Admin only)
+router.post("/:id/register", authenticateToken, async (req, res) => {
+  try {
+    const { id: eventId } = req.params;
+    const userId = req.user.id;
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        _count: {
+          select: { registrations: true },
+        },
+      },
+    });
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    if (event._count.registrations >= event.capacity) {
+      return res.status(400).json({ error: "Event is full" });
+    }
+
+    const existingRegistration = await prisma.registration.findUnique({
+      where: {
+        userId_eventId: {
+          userId,
+          eventId,
+        },
+      },
+    });
+
+    if (existingRegistration) {
+      return res
+        .status(400)
+        .json({ error: "Already registered for this event" });
+    }
+
+    const qrCodeData = `CAMPUSCONNECT:${userId}:${eventId}:${Date.now()}`;
+
+    const qrCodeImage = await QRCode.toDataURL(qrCodeData, {
+      width: 300,
+      margin: 2,
+      color: {
+        dark: "#000000",
+        light: "#FFFFFF",
+      },
+    });
+
+    const registration = await prisma.registration.create({
+      data: {
+        userId,
+        eventId,
+        qrCode: qrCodeImage,
+        qrCodeData,
+      },
+      include: {
+        event: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            rollNumber: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json({
+      message: "Registration successful",
+      registration,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ error: "Failed to register for event" });
+  }
+});
+
+router.get(
+  "/:id/registrations",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const registrations = await prisma.registration.findMany({
+        where: { eventId: id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              rollNumber: true,
+            },
+          },
+        },
+        orderBy: {
+          registeredAt: "desc",
+        },
+      });
+
+      res.json(registrations);
+    } catch (error) {
+      console.error("Get event registrations error:", error);
+      res.status(500).json({ error: "Failed to fetch registrations" });
+    }
+  }
+);
+
 router.post(
   "/",
   authenticateToken,
@@ -147,7 +275,6 @@ router.post(
   }
 );
 
-// PUT /api/events/:id - Update event (Admin only)
 router.put(
   "/:id",
   authenticateToken,
@@ -184,7 +311,6 @@ router.put(
   }
 );
 
-// DELETE /api/events/:id - Delete event (Admin only)
 router.delete("/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;

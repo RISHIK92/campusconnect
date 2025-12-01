@@ -1,18 +1,16 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { PrismaClient } = require("@prisma/client");
 const { validate } = require("../middleware/validate");
 const { signupSchema, loginSchema } = require("../utils/validation");
+const { prisma } = require("../config/db.js");
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-// POST /api/auth/signup - Register new user
 router.post("/signup", validate(signupSchema), async (req, res) => {
   try {
     const { email, password, name, rollNumber } = req.body;
@@ -67,14 +65,13 @@ router.post("/signup", validate(signupSchema), async (req, res) => {
   }
 });
 
-// POST /api/auth/login - Login user
 router.post("/login", validate(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "User not found" });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);

@@ -32,7 +32,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/verify", registrationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

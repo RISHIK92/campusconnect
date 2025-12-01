@@ -6,7 +6,7 @@ const validate = (schema) => {
     } catch (error) {
       return res.status(400).json({
         error: "Validation failed",
-        error,
+        details: error,
       });
     }
   };

@@ -1,13 +1,12 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 const { authenticateToken, isAdmin } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { updateUserRoleSchema } = require("../utils/validation");
+const { prisma } = require("../config/db");
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-router.get("/dashboard", authenticateToken, isAdmin, async (req, res) => {
+router.get("/stats", authenticateToken, isAdmin, async (req, res) => {
   try {
     // Get counts
     const [totalUsers, totalEvents, totalRegistrations, upcomingEvents] =
@@ -67,16 +66,14 @@ router.get("/dashboard", authenticateToken, isAdmin, async (req, res) => {
     });
 
     res.json({
-      stats: {
-        totalUsers,
-        totalEvents,
-        totalRegistrations,
-        upcomingEvents,
-        attendanceRate:
-          totalRegistrations > 0
-            ? ((attendedCount / totalRegistrations) * 100).toFixed(2)
-            : 0,
-      },
+      totalUsers,
+      totalEvents,
+      totalRegistrations,
+      upcomingEvents,
+      attendanceRate:
+        totalRegistrations > 0
+          ? ((attendedCount / totalRegistrations) * 100).toFixed(2)
+          : 0,
       recentRegistrations,
       popularEvents: popularEvents.map((event) => ({
         ...event,
