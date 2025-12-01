@@ -75,7 +75,12 @@ export default function AdminDashboard() {
 
       if (eventsRes.ok) {
         const eventsData = await eventsRes.json();
-        setEvents(eventsData);
+        // Handle paginated response
+        if (eventsData.events && Array.isArray(eventsData.events)) {
+          setEvents(eventsData.events);
+        } else if (Array.isArray(eventsData)) {
+          setEvents(eventsData);
+        }
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -188,12 +193,30 @@ export default function AdminDashboard() {
   const openModal = (event = null) => {
     if (event) {
       setEditingEvent(event);
+      const convertTo24Hour = (timeStr) => {
+        if (!timeStr) return "";
+        if (!timeStr.includes("AM") && !timeStr.includes("PM")) return timeStr;
+
+        const [time, modifier] = timeStr.split(" ");
+        let [hours, minutes] = time.split(":");
+
+        if (hours === "12") {
+          hours = "00";
+        }
+
+        if (modifier === "PM") {
+          hours = parseInt(hours, 10) + 12;
+        }
+
+        return `${hours.toString().padStart(2, "0")}:${minutes}`;
+      };
+
       setFormData({
         title: event.title,
         description: event.description,
         venue: event.venue,
         date: new Date(event.date).toISOString().split("T")[0],
-        time: event.time,
+        time: convertTo24Hour(event.time),
         capacity: event.capacity,
         imageUrl: event.imageUrl || "",
         category: event.category || "",
