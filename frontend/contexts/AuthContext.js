@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Load user from localStorage on mount
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
@@ -57,6 +56,10 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     isAdmin,
+    updateUser: (userData) => {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    },
     isAuthenticated: !!token,
   };
 

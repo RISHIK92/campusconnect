@@ -8,6 +8,7 @@ const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/events");
 const registrationRoutes = require("./routes/registrations");
 const adminRoutes = require("./routes/admin");
+const profileRoutes = require("./routes/profile");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

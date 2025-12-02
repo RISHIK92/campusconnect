@@ -166,40 +166,4 @@ router.get("/users", authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/admin/users/:id/role - Update user role
-router.patch(
-  "/users/:id/role",
-  authenticateToken,
-  isAdmin,
-  validate(updateUserRoleSchema),
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { role } = req.body;
-
-      const user = await prisma.user.update({
-        where: { id },
-        data: { role },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-        },
-      });
-
-      res.json({
-        message: "User role updated successfully",
-        user,
-      });
-    } catch (error) {
-      console.error("Update user role error:", error);
-      if (error.code === "P2025") {
-        return res.status(404).json({ error: "User not found" });
-      }
-      res.status(500).json({ error: "Failed to update user role" });
-    }
-  }
-);
-
 module.exports = router;

@@ -116,6 +116,38 @@ export default function EventDetailsPage() {
     }
   };
 
+  const handleDeregister = async () => {
+    if (!confirm("Are you sure you want to cancel your registration?")) return;
+
+    setRegistering(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/registrations/${registration.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Deregistration failed");
+      }
+
+      toast.success("Registration cancelled successfully");
+      setRegistration(null);
+      fetchEventDetails();
+    } catch (error) {
+      console.error("Deregistration error:", error);
+      toast.error(error.message);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const downloadQRCode = () => {
     if (!registration || !registration.qrCode) return;
 
@@ -277,10 +309,26 @@ export default function EventDetailsPage() {
                       </button>
                       <Link
                         href="/registrations"
-                        className="block w-full py-2 px-4 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                        className="block w-full py-2 px-4 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors mb-3"
                       >
                         View All Registrations
                       </Link>
+                      {!isPast && !registration.attended && (
+                        <button
+                          onClick={handleDeregister}
+                          disabled={registering}
+                          className="w-full py-2 px-4 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition-colors border border-red-200"
+                        >
+                          {registering ? (
+                            <span className="flex items-center justify-center">
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                              Cancelling...
+                            </span>
+                          ) : (
+                            "Cancel Registration"
+                          )}
+                        </button>
+                      )}
                       <p className="text-xs text-gray-400 mt-4 break-all">
                         ID: {registration.id}
                       </p>

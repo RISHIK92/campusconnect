@@ -36,6 +36,12 @@ export default function HomePage() {
                   >
                     Events
                   </Link>
+                  <Link
+                    href="/profile"
+                    className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                  >
+                    Profile
+                  </Link>
                   {!isAdmin() && (
                     <Link
                       href="/registrations"
