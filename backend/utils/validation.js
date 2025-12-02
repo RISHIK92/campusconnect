@@ -52,7 +52,6 @@ const updateEventSchema = z.object({
   organizer: z.string().min(1).optional(),
 });
 
-// User schemas
 const updateUserRoleSchema = z.object({
   role: z.enum(["USER", "ADMIN"], {
     errorMap: () => ({ message: "Role must be either USER or ADMIN" }),

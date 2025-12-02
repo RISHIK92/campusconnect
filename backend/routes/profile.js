@@ -4,13 +4,11 @@ const prisma = require("../config/db.js");
 
 const router = express.Router();
 
-// PUT /api/profile - Update user profile
 router.put("/", authenticateToken, async (req, res) => {
   try {
     const { name, rollNumber } = req.body;
     const userId = req.user.id;
 
-    // Check if roll number is already taken by another user
     if (rollNumber) {
       const existingRoll = await prisma.user.findFirst({
         where: {

@@ -69,12 +69,10 @@ router.delete("/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ error: "Registration not found" });
     }
 
-    // Check if user owns this registration or is admin
     if (registration.userId !== req.user.id && req.user.role !== "ADMIN") {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    // Check if already attended
     if (registration.attended) {
       return res
         .status(400)
@@ -92,7 +90,6 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/registrations/verify/:qrCodeData - Verify QR code and mark attendance (Admin only)
 router.get(
   "/verify/:qrCodeData",
   authenticateToken,
@@ -120,7 +117,6 @@ router.get(
         return res.status(404).json({ error: "Invalid QR code" });
       }
 
-      // Mark as attended if not already
       if (!registration.attended) {
         await prisma.registration.update({
           where: { id: registration.id },

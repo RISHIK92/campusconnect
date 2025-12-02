@@ -1,14 +1,11 @@
 const express = require("express");
 const { authenticateToken, isAdmin } = require("../middleware/auth");
-const { validate } = require("../middleware/validate");
-const { updateUserRoleSchema } = require("../utils/validation");
 const prisma = require("../config/db");
 
 const router = express.Router();
 
 router.get("/stats", authenticateToken, isAdmin, async (req, res) => {
   try {
-    // Get counts
     const [totalUsers, totalEvents, totalRegistrations, upcomingEvents] =
       await Promise.all([
         prisma.user.count(),
@@ -23,12 +20,10 @@ router.get("/stats", authenticateToken, isAdmin, async (req, res) => {
         }),
       ]);
 
-    // Get attendance stats
     const attendedCount = await prisma.registration.count({
       where: { attended: true },
     });
 
-    // Get recent registrations
     const recentRegistrations = await prisma.registration.findMany({
       take: 10,
       orderBy: {
@@ -50,7 +45,6 @@ router.get("/stats", authenticateToken, isAdmin, async (req, res) => {
       },
     });
 
-    // Get popular events
     const popularEvents = await prisma.event.findMany({
       take: 5,
       include: {
