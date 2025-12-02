@@ -12,12 +12,11 @@ export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("all"); // all, upcoming, past
+  const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalEvents, setTotalEvents] = useState(0);
 
-  // Debounce search term
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
 
   useEffect(() => {
@@ -27,7 +26,6 @@ export default function EventsPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Reset page when filter or search changes
   useEffect(() => {
     setPage(1);
   }, [filter, debouncedSearch]);
@@ -38,7 +36,6 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     try {
-      // setLoading(true);
       const headers = {};
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -60,7 +57,6 @@ export default function EventsPage() {
       }
 
       const data = await response.json();
-      // Handle both old array format (fallback) and new object format
       if (Array.isArray(data)) {
         setEvents(data);
         setTotalPages(1);
@@ -189,7 +185,7 @@ export default function EventsPage() {
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && (
+            {totalPages > 0 && (
               <div className="mt-8 flex justify-center items-center space-x-2">
                 <button
                   onClick={() => handlePageChange(page - 1)}

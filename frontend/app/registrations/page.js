@@ -24,6 +24,8 @@ export default function MyRegistrationsPage() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // all, upcoming, past, attended, not-attended
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -31,22 +33,27 @@ export default function MyRegistrationsPage() {
       return;
     }
     fetchRegistrations();
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, filter, currentPage]);
 
   const fetchRegistrations = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/registrations/my`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      setLoading(true);
+      const response = await fetch(
+        `${API_URL}/api/registrations/my?page=${currentPage}&limit=9&filter=${filter}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch registrations");
       }
 
       const data = await response.json();
-      setRegistrations(data);
+      setRegistrations(data.registrations);
+      setTotalPages(data.pagination.pages);
     } catch (error) {
       console.error("Error fetching registrations:", error);
       toast.error("Failed to load registrations");
@@ -66,38 +73,6 @@ export default function MyRegistrationsPage() {
     document.body.removeChild(link);
     toast.success("QR Code downloaded!");
   };
-
-  const getFilteredRegistrations = () => {
-    const now = new Date();
-
-    return registrations.filter((reg) => {
-      const eventDate = new Date(reg.event.date);
-      const isPast = eventDate < now;
-
-      switch (filter) {
-        case "upcoming":
-          return !isPast;
-        case "past":
-          return isPast;
-        case "attended":
-          return reg.attended;
-        case "not-attended":
-          return !reg.attended;
-        default:
-          return true;
-      }
-    });
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-black" />
-      </div>
-    );
-  }
-
-  const filteredRegistrations = getFilteredRegistrations();
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -127,7 +102,10 @@ export default function MyRegistrationsPage() {
           ].map((filterOption) => (
             <button
               key={filterOption.value}
-              onClick={() => setFilter(filterOption.value)}
+              onClick={() => {
+                setFilter(filterOption.value);
+                setCurrentPage(1);
+              }}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === filterOption.value
                   ? "bg-black text-white"
@@ -140,7 +118,11 @@ export default function MyRegistrationsPage() {
         </div>
 
         {/* Registrations List */}
-        {filteredRegistrations.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-black" />
+          </div>
+        ) : registrations.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
             <QrCode className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -160,7 +142,7 @@ export default function MyRegistrationsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRegistrations.map((registration) => {
+            {registrations.map((registration) => {
               const isPast = new Date(registration.event.date) < new Date();
 
               return (
@@ -256,6 +238,31 @@ export default function MyRegistrationsPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {!loading && totalPages > 1 && (
+          <div className="mt-8 flex justify-center items-center gap-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm font-medium text-gray-700 bg-white"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-600 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm font-medium text-gray-700 bg-white"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

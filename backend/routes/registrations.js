@@ -6,17 +6,53 @@ const router = express.Router();
 
 router.get("/my", authenticateToken, async (req, res) => {
   try {
-    const registrations = await prisma.registration.findMany({
-      where: { userId: req.user.id },
-      include: {
-        event: true,
-      },
-      orderBy: {
-        registeredAt: "desc",
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const filter = req.query.filter || "all";
+    const skip = (page - 1) * limit;
+
+    let where = { userId: req.user.id };
+    const now = new Date();
+
+    switch (filter) {
+      case "upcoming":
+        where.event = { date: { gt: now } };
+        break;
+      case "past":
+        where.event = { date: { lt: now } };
+        break;
+      case "attended":
+        where.attended = true;
+        break;
+      case "not-attended":
+        where.attended = false;
+        break;
+    }
+
+    const [registrations, total] = await prisma.$transaction([
+      prisma.registration.findMany({
+        where,
+        include: {
+          event: true,
+        },
+        orderBy: {
+          registeredAt: "desc",
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.registration.count({ where }),
+    ]);
+
+    res.json({
+      registrations,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        page,
+        limit,
       },
     });
-
-    res.json(registrations);
   } catch (error) {
     console.error("Get registrations error:", error);
     res.status(500).json({ error: "Failed to fetch registrations" });
