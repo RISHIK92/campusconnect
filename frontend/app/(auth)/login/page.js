@@ -33,19 +33,16 @@ export default function LoginPage() {
     try {
       const response = await api.login(formData);
 
-      // Check if user is admin when trying admin login
       if (loginType === "admin" && response.user.role !== "ADMIN") {
         toast.error("Access denied. Admin credentials required.");
         setLoading(false);
         return;
       }
 
-      // Store token and user data
       login(response.user, response.token);
 
       toast.success("Login successful!");
 
-      // Redirect based on role
       if (response.user.role === "ADMIN") {
         router.push("/admin/dashboard");
       } else {
@@ -166,17 +163,30 @@ export default function LoginPage() {
               >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type={open ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 text-black placeholder:text-gray-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your password"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={open ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 text-black placeholder:text-gray-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setOpen(!open)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  {open ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
